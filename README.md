@@ -24,5 +24,5 @@ has to be run everytime before sending in a request.
 >re-running the web server immediately will not work. wait for a little  
 >while before running the web server again.
 >
->run the web server with `strace` to see if the port is active.
->`strace ./web_server
+>run the web server with `strace` to see if the port is active.  
+>`strace ./web_server`
