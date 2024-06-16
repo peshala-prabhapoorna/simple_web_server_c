@@ -7,10 +7,12 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 const uint16_t PORT = 8000;
 
-void main() {
+int main() {
+    printf("staring server...\n");
     // create an endpoint for communication (fd: file descriptor)
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -21,6 +23,8 @@ void main() {
         htons(PORT),
         0
     };
+    printf("listening on http://127.0.0.1:%d (press Ctrl + C to quit)\n",  
+            PORT);
     bind(socket_fd, (struct sockaddr *) &address, sizeof(address));
 
     // listen for connection on a socket
@@ -44,10 +48,17 @@ void main() {
     // transfer data between file descriptors
     struct stat stat_buffer;
     stat(requested_file, &stat_buffer);
-    sendfile(client_socket_fd, opened_requested_file_fd, 0, stat_buffer.st_size);
+    sendfile(client_socket_fd, opened_requested_file_fd, 0, 
+            stat_buffer.st_size);
 
+    printf("127.0.0.1:%d \"%s\" 200 OK\n", address.sin_port, buffer);
+
+    printf("shutting down server...\n"); 
     // close fd
     close(opened_requested_file_fd);
     close(client_socket_fd);
     close(socket_fd);
+    printf("server shutdown complete");
+
+    return 0;
 }
