@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 const uint16_t PORT = 8000;
 
@@ -27,36 +28,39 @@ int main() {
             PORT);
     bind(socket_fd, (struct sockaddr *) &address, sizeof(address));
 
-    // listen for connection on a socket
-    listen(socket_fd, 10);
+    while (true) {
+        // listen for connection on a socket
+        listen(socket_fd, 10);
 
-    // accept a connection on a socket
-    int client_socket_fd = accept(socket_fd, 0, 0);
+        // accept a connection on a socket
+        int client_socket_fd = accept(socket_fd, 0, 0);
 
-    // receive a message from socket (string from client)
-    char buffer[256] = {0};
-    recv(client_socket_fd, buffer, 256, 0);
+        // receive a message from socket (string from client)
+        char buffer[256] = {0};
+        recv(client_socket_fd, buffer, 256, 0);
 
-    // GET /index.html ... 
-    // extract 'index.html' from client request
-    char* requested_file = buffer + 5;
-    *strchr(requested_file, ' ') = 0;
-    
-    // open requested file
-    int opened_requested_file_fd = open(requested_file, O_RDONLY);
+        // GET /index.html ... 
+        // extract 'index.html' from client request
+        char* requested_file = buffer + 5;
+        *strchr(requested_file, ' ') = 0;
+        
+        // open requested file
+        int opened_requested_file_fd = open(requested_file, O_RDONLY);
 
-    // transfer data between file descriptors
-    struct stat stat_buffer;
-    stat(requested_file, &stat_buffer);
-    sendfile(client_socket_fd, opened_requested_file_fd, 0, 
-            stat_buffer.st_size);
+        // transfer data between file descriptors
+        struct stat stat_buffer;
+        stat(requested_file, &stat_buffer);
+        sendfile(client_socket_fd, opened_requested_file_fd, 0, 
+                stat_buffer.st_size);
 
-    printf("127.0.0.1:%d \"%s\" 200 OK\n", address.sin_port, buffer);
+        printf("127.0.0.1:%d \"%s\" 200 OK\n", address.sin_port, buffer);
+
+        // close fd
+        close(opened_requested_file_fd);
+        close(client_socket_fd);
+    }
 
     printf("shutting down server...\n"); 
-    // close fd
-    close(opened_requested_file_fd);
-    close(client_socket_fd);
     close(socket_fd);
     printf("server shutdown complete");
 

@@ -16,12 +16,9 @@ curl localhost:8000/FILE
 ```
 replace FILE with an html file in the root directory.  
   
-the web server exits after responding to one request. therefore, the server  
-has to be run everytime before sending in a request. 
-
 >[!WARNING]
->it takes some time to free the port binded to the web server. therefore  
->re-running the web server immediately will not work. wait for a little  
+>it may take some time to free the port binded to the web server. therefore  
+>re-running the web server immediately might not work. wait for a little  
 >while before running the web server again.
 >
 >run the web server with `strace` to see if the port is active.  
